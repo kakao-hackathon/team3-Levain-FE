@@ -43,7 +43,6 @@ function OthersPage2() {
                         Authorization: `Bearer ${token}`
                     }
                 });
-                console.log("로그인한 유저 : ", response.data.data.userName);
                 setLoggedInUserName(response.data.data.userName);
             } catch (error) {
                 console.error('사용자 정보를 가져오는 데 실패했습니다:', error);
@@ -66,7 +65,6 @@ function OthersPage2() {
                     Authorization: `Bearer ${token}`
                 }
             });
-            console.log('편지 리스트:', response.data.data.content);
             const lettersData = response.data.data.content;
             setLetters(lettersData);
             setHasNext(response.data.data.hasNext);
@@ -102,12 +100,11 @@ function OthersPage2() {
     };
 
     const handleSelectOrnament = (id) => {
-        console.log("선택한 장식 ID : ", id)
-        navigate(`/letter/create`, { state: { ornamentId: id } });
+        navigate(`create`, { state: { ornamentId: id } });
     };
 
     const handleLetterClick = async (letterId) => {
-        console.log(`Fetching letter with ID: ${letterId}`);
+        //console.log(`Fetching letter with ID: ${letterId}`);
         if (isOwner) {
             try {
                 const response = await axios.get(`/api/letters/${letterId}`, {
@@ -115,7 +112,7 @@ function OthersPage2() {
                         Authorization: `Bearer ${token}`
                     }
                 });
-                console.log("Letter data:", response.data.data);
+                //console.log(response)
                 setSelectedLetter(response.data.data);
                 setModalVisible(true);
             } catch (error) {

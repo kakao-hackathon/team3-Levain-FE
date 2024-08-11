@@ -25,9 +25,6 @@ const LetterCreate = () => {
     useEffect(() => {
         if (formData.from && formData.message) {
             setIsValid(true);
-            console.log(formData)
-            console.log(userName)
-            console.log(ornamentId)
         } else {
             setIsValid(false);
         }
@@ -54,7 +51,7 @@ const LetterCreate = () => {
                 }
             });
 
-            console.log(response);
+            //console.log(response);
 
             setFlipCard(!flipCard);
             setTimeout(() => {

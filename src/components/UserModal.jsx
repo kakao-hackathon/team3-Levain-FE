@@ -18,7 +18,6 @@ function UserModal({ user }) {
                         Authorization: `Bearer ${token}`
                     }
                 });
-                console.log("로그인한 유저 : ", response.data.data.userName);
                 setLoggedInUserName(response.data.data.userName);
             } catch (error) {
                 console.error('사용자 정보를 가져오는 데 실패했습니다:', error);
