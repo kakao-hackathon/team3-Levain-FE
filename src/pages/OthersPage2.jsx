@@ -100,7 +100,7 @@ function OthersPage2() {
 
     const handleSelectOrnament = (id) => {
         console.log("선택한 장식 ID : ", id)
-        navigate(`/letter/create`, { state: { ornamentId: id } });
+        navigate(`create`, { state: { ornamentId: id } });
     };
 
     const handleNextLevain = () => {
