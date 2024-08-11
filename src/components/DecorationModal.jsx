@@ -16,42 +16,43 @@ function DecorationModal({ isVisible, onClose, onSelect, userName }) {
     const [ornaments, setOrnaments] = useState([]);
     const token = localStorage.getItem("accessToken");
 
-    useEffect(() => {
-        const fetchIcons = async () => {
-            try {
-                const response = await axios.get(API_ICONS, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
-
-                if (response.status === 200) {
-                    console.log(response.data.data)
-                    const fetchedOrnaments = response.data.data.map(icon => ({
-                        id: icon.iconId,
-                        image: `http://localhost:8080${icon.iconPath}`,
-                        name: icon.iconName,
-                        locked: !icon.purchased,
-                        price: icon.price
-                    }));
-
-                    const freeOrnaments = fetchedOrnaments
-                        .filter(ornament => ornament.price === 0)
-                        .map(ornament => ornament.id);
-
-                    const purchasedOrnaments = fetchedOrnaments
-                        .filter(ornament => !ornament.locked)
-                        .map(ornament => ornament.id);
-
-                    setOrnaments(fetchedOrnaments);
-                    setUnlockedOrnaments([...purchasedOrnaments, ...freeOrnaments]);
+    // fetchIcons 함수를 useEffect 외부로 이동
+    const fetchIcons = async () => {
+        try {
+            const response = await axios.get(API_ICONS, {
+                headers: {
+                    Authorization: `Bearer ${token}`
                 }
-            } catch (error) {
-                console.error('Failed to fetch icons:', error);
-            }
-        };
+            });
 
-        fetchIcons();
+            if (response.status === 200) {
+
+                const fetchedOrnaments = response.data.data.map(icon => ({
+                    id: icon.iconId,
+                    image: `http://localhost:8080${icon.iconPath}`,
+                    name: icon.iconName,
+                    price: icon.price,
+                    purchased: icon.purchased
+                }));
+
+                const freeOrnaments = fetchedOrnaments
+                    .filter(ornament => ornament.price === 0)
+                    .map(ornament => ornament.id);
+
+                const purchasedOrnaments = fetchedOrnaments
+                    .filter(ornament => ornament.purchased)
+                    .map(ornament => ornament.id);
+
+                setOrnaments(fetchedOrnaments);
+                setUnlockedOrnaments([...purchasedOrnaments, ...freeOrnaments]);
+            }
+        } catch (error) {
+            console.error('Failed to fetch icons:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchIcons(); // 초기 로드 시 아이콘 목록을 가져옴
     }, [token]);
 
     useEffect(() => {
@@ -62,7 +63,7 @@ function DecorationModal({ isVisible, onClose, onSelect, userName }) {
                         'Authorization': `Bearer ${token}`
                     }
                 });
-                console.log(responseUserMe.data.data)
+
                 setCoins(responseUserMe.data.data.reward);
             } catch (error) {
                 console.error("Error fetching user data:", error);
@@ -73,7 +74,7 @@ function DecorationModal({ isVisible, onClose, onSelect, userName }) {
     }, [token]);
 
     const handleSelect = (ornament) => {
-        if (ornament.locked && !unlockedOrnaments.includes(ornament.id)) {
+        if (!ornament.purchased && !unlockedOrnaments.includes(ornament.id)) {
             setPurchaseOrnament(ornament);
             setShowPurchaseModal(true);
             return;
@@ -104,6 +105,9 @@ function DecorationModal({ isVisible, onClose, onSelect, userName }) {
                     setShowPurchaseModal(false);
                     setSelectedId(purchaseOrnament.id);
                     setIsNextButtonDisabled(false);
+
+                    // 구매 후 아이콘 목록을 다시 가져옴
+                    await fetchIcons();
                 } else {
                     console.error('Failed to purchase ornament:', response.status);
                 }
@@ -120,10 +124,10 @@ function DecorationModal({ isVisible, onClose, onSelect, userName }) {
     };
 
     const handleAdd = () => {
-    if (!isNextButtonDisabled) {
-        onSelect(selectedId);
-    }
-};
+        if (!isNextButtonDisabled) {
+            onSelect(selectedId);
+        }
+    };
 
     const closePurchaseModal = () => {
         setShowPurchaseModal(false);
@@ -138,14 +142,14 @@ function DecorationModal({ isVisible, onClose, onSelect, userName }) {
         return ornaments.map((ornament) => (
             <div
                 key={ornament.id}
-                className={`ornament-item ${selectedId === ornament.id ? 'selected' : ''} ${ornament.locked && !unlockedOrnaments.includes(ornament.id) ? 'locked' : ''}`}
+                className={`ornament-item ${selectedId === ornament.id ? 'selected' : ''} ${!ornament.purchased ? 'locked' : ''}`}
                 onClick={() => handleSelect(ornament)}
             >
                 <div
                     className="ornament-background"
                     style={{ backgroundImage: `url(${ornament.image})` }}
                 >
-                    {ornament.locked && !unlockedOrnaments.includes(ornament.id) && coins < ornament.price && (
+                    {!ornament.purchased && (
                         <div className="locked-overlay">
                             <img src={lockedIcon} alt="잠김 아이콘" className="locked-icon" />
                         </div>

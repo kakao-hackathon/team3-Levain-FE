@@ -56,6 +56,7 @@ function UserModal({ user }) {
             <div
                 onClick={() => {
                     localStorage.removeItem("accessToken");
+                    alert("로그아웃이 완료되었습니다.")
                     nav("/login");
                 }}
                 className="logout-section">

@@ -32,22 +32,23 @@ body, html {
 
 .create-letter {
     position: absolute;
-    width: 150px; /* 버튼의 가로 길이 설정 */
-    top: 76%; /* 중앙에서 살짝 아래로 설정 */
+    width: 150px; 
+    top: 76%; 
     left: 50%;
     transform: translate(-50%, -50%);
-    background-color: #FFD700; /* 버튼 색상 설정 */
+    background-color: #FFD700; 
     color: black;
     border: none;
     border-radius: 20px;
-    padding: 3px 15px; /* 버튼의 세로 길이 설정 */
+    padding: 3px 15px; 
     cursor: pointer;
     font-size: 16px;
     text-align: center;
-    text-decoration: none; /* 밑줄 제거 */
+    text-decoration: none; 
     display: inline-block;
     background: linear-gradient(0deg, rgba(255, 151, 0, 1) 0%, rgba(251, 75, 2, 1) 100%);
     line-height: 42px;
+    margin-top: 8vh;
 }
 
 .create-letter {
@@ -95,12 +96,76 @@ body, html {
 }
 
 .selected-ornament .ornament-image {
-    width: 100px;
-    height: 100px;
+    width: 80px;
+    height: 80px;
 }
 
 .selected-ornament .from-name {
     font-size: 18px;
     color: black;
     margin-top: 10px;
+}
+
+.modal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    position: relative;
+    background-color: #f9f9f9;
+    width: 300px;
+    border-radius: 15px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.modal-icon {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+    position: relative;
+    top: -40px;
+}
+
+.modal-icon-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+}
+
+.modal-message {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.modal-from {
+    font-size: 12px;
+    color: #999;
+    margin-top: 10px;
+}
+
+.close-letter-button {
+    background-color: #FFD700;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    border: none;
+    margin-top: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.close-letter-button:hover {
+    background-color: #F3A333;
 }

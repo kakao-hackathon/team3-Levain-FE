@@ -54,7 +54,6 @@ function Main() {
                 className="levain-button"
                 onClick={handleModalOpen}
             />
-            <div className="letter-cnt">5</div>
             {isModalOpen && <UserModal user={user} />}
         </div>
     );
