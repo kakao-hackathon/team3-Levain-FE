@@ -4,7 +4,7 @@ import axios from 'axios';
 import '../styles/pages/LetterCreate.css';
 import { API_LETTERS } from '../config';
 
-const LetterCreate = ({}) => {
+const LetterCreate = () => {
     const { userName } = useParams();
     const location = useLocation();
     const ornamentId = location.state?.ornamentId;
@@ -22,7 +22,6 @@ const LetterCreate = ({}) => {
         setFormData({ ...formData, [name]: value });
     };
 
-     
     useEffect(() => {
         if (formData.from && formData.message) {
             setIsValid(true);
@@ -64,6 +63,10 @@ const LetterCreate = ({}) => {
         } catch (error) {
             console.error('Error sending letter:', error);
         }
+    };
+
+    const handleGoBack = () => {
+        navigate(`/letter/${userName}`);
     };
 
     return (

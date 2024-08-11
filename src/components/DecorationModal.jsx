@@ -120,11 +120,10 @@ function DecorationModal({ isVisible, onClose, onSelect, userName }) {
     };
 
     const handleAdd = () => {
-        if (!isNextButtonDisabled) {
-            onSelect(selectedId);
-            navigate(`/letter/${userName}/create`, { state: { ornamentId: selectedId } });
-        }
-    };
+    if (!isNextButtonDisabled) {
+        onSelect(selectedId);
+    }
+};
 
     const closePurchaseModal = () => {
         setShowPurchaseModal(false);
