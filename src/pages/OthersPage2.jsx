@@ -104,6 +104,7 @@ function OthersPage2() {
     };
 
     const handleLetterClick = async (letterId) => {
+        //console.log(`Fetching letter with ID: ${letterId}`);
         if (isOwner) {
             try {
                 const response = await axios.get(`/api/letters/${letterId}`, {
@@ -111,7 +112,7 @@ function OthersPage2() {
                         Authorization: `Bearer ${token}`
                     }
                 });
-
+                //console.log(response)
                 setSelectedLetter(response.data.data);
                 setModalVisible(true);
             } catch (error) {
