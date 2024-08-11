@@ -1,9 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/components/DecorationModal.css';
 import lockedIcon from '../assets/locked.png';
-import addIcon from "../assets/ornament/add.png";
-import NameInputModal from './NameInputModal';
 import { API_ICONS, API_USER_ME, API_PURCHASE } from '../config';
 import axios from 'axios';
 
@@ -13,17 +11,11 @@ function DecorationModal({ isVisible, onClose, onSelect, userName }) {
     const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     const [purchaseOrnament, setPurchaseOrnament] = useState(null);
     const [unlockedOrnaments, setUnlockedOrnaments] = useState([]);
-    const fileInputRef = useRef(null);
     const navigate = useNavigate();
-    const [currentPage, setCurrentPage] = useState(0);
-    const [showNameInputModal, setShowNameInputModal] = useState(false);
-    const [newOrnamentImage, setNewOrnamentImage] = useState(null);
-    const [ornamentName, setOrnamentName] = useState('');
     const [isNextButtonDisabled, setIsNextButtonDisabled] = useState(true);
     const [ornaments, setOrnaments] = useState([]);
     const token = localStorage.getItem("accessToken");
 
-    // 모든 아이콘 정보 가져오기
     useEffect(() => {
         const fetchIcons = async () => {
             try {
@@ -43,26 +35,15 @@ function DecorationModal({ isVisible, onClose, onSelect, userName }) {
                         price: icon.price
                     }));
 
-                    // 가격이 0인 아이콘들의 ID 목록 가져오기
                     const freeOrnaments = fetchedOrnaments
                         .filter(ornament => ornament.price === 0)
                         .map(ornament => ornament.id);
 
-                    // 구매한 장식 목록 가져오기
                     const purchasedOrnaments = fetchedOrnaments
                         .filter(ornament => !ornament.locked)
                         .map(ornament => ornament.id);
 
-                    const addOrnament = { 
-                        id: fetchedOrnaments.length + 1,
-                        image: newOrnamentImage || addIcon,
-                        name: '장식 추가', 
-                        locked: !newOrnamentImage,
-                        price: 5
-                    };
-
-                    setOrnaments([...fetchedOrnaments, addOrnament]);
-                    // 구매한 장식과 무료 장식을 초기값으로 설정
+                    setOrnaments(fetchedOrnaments);
                     setUnlockedOrnaments([...purchasedOrnaments, ...freeOrnaments]);
                 }
             } catch (error) {
@@ -71,9 +52,8 @@ function DecorationModal({ isVisible, onClose, onSelect, userName }) {
         };
 
         fetchIcons();
-    }, [token, newOrnamentImage]);
+    }, [token]);
 
-    // 로그인한 사용자 정보 가져오기
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -83,7 +63,7 @@ function DecorationModal({ isVisible, onClose, onSelect, userName }) {
                     }
                 });
                 console.log(responseUserMe.data.data)
-                setCoins(responseUserMe.data.data.reward); // 사용자의 코인 업데이트
+                setCoins(responseUserMe.data.data.reward);
             } catch (error) {
                 console.error("Error fetching user data:", error);
             }
@@ -92,7 +72,6 @@ function DecorationModal({ isVisible, onClose, onSelect, userName }) {
         fetchData();
     }, [token]);
 
-    // 장식 선택 처리
     const handleSelect = (ornament) => {
         if (ornament.locked && !unlockedOrnaments.includes(ornament.id)) {
             setPurchaseOrnament(ornament);
@@ -104,19 +83,10 @@ function DecorationModal({ isVisible, onClose, onSelect, userName }) {
             setIsNextButtonDisabled(true);
         } else {
             setSelectedId(ornament.id);
-            if (ornament.name === '장식 추가' && unlockedOrnaments.includes(ornament.id)) {
-                setTimeout(() => {
-                    if (fileInputRef.current) {
-                        fileInputRef.current.click();
-                    }
-                }, 0);
-            } else {
-                setIsNextButtonDisabled(false);
-            }
+            setIsNextButtonDisabled(false);
         }
     };
 
-    // 장식 구매 처리
     const handlePurchase = async () => {
         if (purchaseOrnament && (coins >= purchaseOrnament.price || purchaseOrnament.price === 0)) {
             try {
@@ -129,7 +99,6 @@ function DecorationModal({ isVisible, onClose, onSelect, userName }) {
                 });
 
                 if (response.status === 200) {
-                    // 구매 성공 시 코인 차감 및 잠금 해제 처리
                     setCoins(coins - purchaseOrnament.price);
                     setUnlockedOrnaments([...unlockedOrnaments, purchaseOrnament.id]);
                     setShowPurchaseModal(false);
@@ -150,115 +119,24 @@ function DecorationModal({ isVisible, onClose, onSelect, userName }) {
         }
     };
 
-
-    // 파일 입력 처리
-    const handleFileChange = (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            setNewOrnamentImage(file);
-            setShowNameInputModal(true);
-        }
-    };
-
-    // 새로운 장식 추가 처리
-    const handleAdd = async () => {
+    const handleAdd = () => {
         if (!isNextButtonDisabled) {
-            if (selectedId === ornaments.length) {
-                const formData = new FormData();
-                formData.append('iconName', ornamentName);
-                formData.append('price', '0');
-                formData.append('iconImage', newOrnamentImage);
-
-                try {
-                    const response = await axios.post('http://localhost:8080/api/icons', formData, {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                            'Content-Type': 'multipart/form-data'
-                        }
-                    });
-
-                    if (response.status === 200) {
-                        const fetchIcons = async () => {
-                            try {
-                                const response = await axios.get(API_ICONS, {
-                                    headers: {
-                                        Authorization: `Bearer ${token}`
-                                    }
-                                });
-
-                                if (response.status === 200) {
-                                    const fetchedOrnaments = response.data.data.map(icon => ({
-                                        id: icon.iconId,
-                                        image: `http://localhost:8080${icon.iconPath}`,
-                                        name: icon.iconName,
-                                        locked: !icon.purchased,
-                                        price: icon.price
-                                    }));
-
-                                    const purchasedOrnaments = fetchedOrnaments
-                                        .filter(ornament => !ornament.locked)
-                                        .map(ornament => ornament.id);
-
-                                    const addOrnament = { 
-                                        id: fetchedOrnaments.length + 1,
-                                        image: newOrnamentImage || addIcon,
-                                        name: '장식 추가', 
-                                        locked: !newOrnamentImage,
-                                        price: 50 
-                                    };
-
-                                    setOrnaments([...fetchedOrnaments, addOrnament]);
-                                    setUnlockedOrnaments(purchasedOrnaments);
-                                }
-                            } catch (error) {
-                                console.error('Failed to fetch icons:', error);
-                            }
-                        };
-                        fetchIcons();
-                    } else {
-                        console.error('Unexpected response status:', response.status);
-                    }
-                } catch (error) {
-                    console.error('Failed to save new ornament:', error);
-                }
-            } else {
-                onSelect(selectedId);
-                navigate(`/letter/${userName}/create`, { state: { ornamentId: selectedId } });
-            }
+            onSelect(selectedId);
+            navigate(`/letter/${userName}/create`, { state: { ornamentId: selectedId } });
         }
     };
 
-    // 구매 모달 닫기
     const closePurchaseModal = () => {
         setShowPurchaseModal(false);
         setPurchaseOrnament(null);
     };
 
-    // 이벤트 전파 방지
     const stopPropagation = (e) => {
         e.stopPropagation();
     };
 
-    // 장식 이름 저장
-    const handleSaveName = (name) => {
-        if (name.length > 0) {
-            setOrnamentName(name);
-            setShowNameInputModal(false);
-        } else {
-            alert('이름을 입력해주세요.');
-        }
-    };
-
-    const ornamentsPerPage = 10;
-    const totalPages = Math.ceil(ornaments.length / ornamentsPerPage);
-
-    // 현재 페이지의 장식 렌더링
     const renderOrnaments = () => {
-        const startIndex = currentPage * ornamentsPerPage;
-        const endIndex = startIndex + ornamentsPerPage;
-        const visibleOrnaments = ornaments.slice(startIndex, endIndex);
-
-        return visibleOrnaments.map((ornament) => (
+        return ornaments.map((ornament) => (
             <div
                 key={ornament.id}
                 className={`ornament-item ${selectedId === ornament.id ? 'selected' : ''} ${ornament.locked && !unlockedOrnaments.includes(ornament.id) ? 'locked' : ''}`}
@@ -277,20 +155,6 @@ function DecorationModal({ isVisible, onClose, onSelect, userName }) {
                 <p className="ornament-text">{ornament.name}</p>
             </div>
         ));
-    };
-
-    // 다음 페이지로 이동
-    const goToNextPage = () => {
-        if (currentPage < totalPages - 1) {
-            setCurrentPage(currentPage + 1);
-        }
-    };
-
-    // 이전 페이지로 이동
-    const goToPreviousPage = () => {
-        if (currentPage > 0) {
-            setCurrentPage(currentPage - 1);
-        }
     };
 
     if (!isVisible) return null;
@@ -319,17 +183,6 @@ function DecorationModal({ isVisible, onClose, onSelect, userName }) {
                         <p>보유 코인: {coins}원</p>
                         <div className="ornament-container">
                             {renderOrnaments()}
-                            <input
-                                type="file"
-                                accept="image/*"
-                                onChange={handleFileChange}
-                                ref={fileInputRef}
-                                style={{ display: 'none' }}
-                            />
-                        </div>
-                        <div className="pagination-buttons">
-                            <button onClick={goToPreviousPage} disabled={currentPage === 0}>이전</button>
-                            <button onClick={goToNextPage} disabled={currentPage === totalPages - 1}>다음</button>
                         </div>
                         <button
                             className={`decoration-next-button ${isNextButtonDisabled ? 'disabled' : ''}`}
@@ -341,16 +194,6 @@ function DecorationModal({ isVisible, onClose, onSelect, userName }) {
                     </>
                 )}
             </div>
-            <NameInputModal
-                isVisible={showNameInputModal}
-                onClose={() => {
-                    setShowNameInputModal(false);
-                    setNewOrnamentImage(null);
-                    setSelectedId(null);
-                    setIsNextButtonDisabled(true);
-                }}
-                onSave={handleSaveName}
-            />
         </div>
     );
 }
